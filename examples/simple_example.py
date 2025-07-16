@@ -32,16 +32,16 @@ program = Program(data, 4096, 10)
 while True:
     state = program.run()
     if state == ProgramState.Running:
-        # Keep running after reaching instruction limit
+        # Keep running after reaching instruction limit (10)
         pass 
     elif state == ProgramState.Called:
-        # Handle syscall if called by guest code
+        # Handle syscall if called by guest code (ECALL)
         program.syscall(syscall_handler)
     elif state == ProgramState.Waiting:
-        # Trigger an interrupt right-away if guest is waiting for it
-        program.interrupt()
+        # Interrupt (passing value = 10) if guest is waiting (WFI)
+        program.interrupt(10)
     elif state == ProgramState.Halted:
-        # Stop if guest code exited
+        # Stop if guest code exited (EBREAK)
         break
 
 # Code does "10 + 20" using syscalls (load from ram and add numbers)

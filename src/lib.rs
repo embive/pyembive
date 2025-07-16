@@ -123,10 +123,13 @@ impl Program {
     }
 
     /// Trigger an interrupt.
-    fn interrupt(&mut self) -> PyResult<()> {
+    /// 
+    /// Arguments:
+    /// - `value`: 32-bit signed integer value to be passed to the interrupt handler.
+    fn interrupt(&mut self, value: i32) -> PyResult<()> {
         let result = self
             .interpreter
-            .with_interpreter_mut(|interpreter| interpreter.interrupt())
+            .with_interpreter_mut(|interpreter| interpreter.interrupt(value))
             .map_err(ProgramError::from);
 
         result.map_err(|e| e.into())

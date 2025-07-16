@@ -1,7 +1,7 @@
 //! Wrapper module for Embive interpreter and memory.
 use embive::interpreter::{
     memory::{Memory, SliceMemory},
-    Config, Interpreter,
+    Interpreter,
 };
 use ouroboros::self_referencing;
 use pyo3::prelude::*;
@@ -51,7 +51,7 @@ impl InterpreterWrapper {
         let interpreter = InterpreterInner::new(memory, |memory| {
             Interpreter::new(
                 memory,
-                Config::default().with_instruction_limit(instruction_limit),
+                instruction_limit,
             )
         });
         InterpreterWrapper(interpreter)
