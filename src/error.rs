@@ -15,9 +15,9 @@ pub enum ProgramError {
 impl Display for ProgramError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ProgramError::Interpreter(err) => write!(f, "Interpreter error: {}", err),
-            ProgramError::Transpiler(err) => write!(f, "Transpiler error: {}", err),
-            ProgramError::Python(err) => write!(f, "Python error: {}", err),
+            ProgramError::Interpreter(err) => write!(f, "Interpreter error: {err}"),
+            ProgramError::Transpiler(err) => write!(f, "Transpiler error: {err}"),
+            ProgramError::Python(err) => write!(f, "Python error: {err}"),
         }
     }
 }

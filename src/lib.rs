@@ -123,7 +123,7 @@ impl Program {
     }
 
     /// Trigger an interrupt.
-    /// 
+    ///
     /// Arguments:
     /// - `value`: 32-bit signed integer value to be passed to the interrupt handler.
     fn interrupt(&mut self, value: i32) -> PyResult<()> {
@@ -139,7 +139,7 @@ impl Program {
     ///
     /// Arguments:
     /// - `syscall_fn`: Python function to call for the syscall.
-    ///     - Example: `def syscall(nr: int, args: List[int], memory: MemoryPy) -> SyscallResult`
+    ///     - Example: `def syscall(nr: int, args: List[int], memory: Memory) -> SyscallResult`
     fn syscall(&mut self, syscall_fn: Bound<'_, PyFunction>) -> PyResult<()> {
         let result = self.interpreter.with_interpreter_mut(|interpreter| {
             interpreter.syscall(&mut |nr,
@@ -215,10 +215,28 @@ impl Program {
             .with_interpreter_mut(|interpreter| interpreter.program_counter = pc);
         Ok(())
     }
+
+    /// Run a function with access to the interpreter memory.
+    ///
+    /// Arguments:
+    /// - `memory_fn`: Python function to call with the memory.
+    ///    - Example: `def memory_fn(memory: Memory) -> None`
+    fn with_memory(&mut self, memory_fn: Bound<'_, PyFunction>) -> PyResult<()> {
+        let result = self.interpreter.with_interpreter_mut(|interpreter| {
+            let fn_scope = |memory: &Py<Memory>| {
+                memory_fn.call1((memory,))?;
+                Ok(())
+            };
+
+            memory_scope(interpreter.memory, fn_scope).map_err(ProgramError::from)
+        });
+
+        result.map_err(|e| e.into())
+    }
 }
 
 /// Embive Python module
-/// 
+///
 /// This module provides the Python bindings for the Embive interpreter and transpiler.
 #[pymodule]
 fn pyembive(m: &Bound<'_, PyModule>) -> PyResult<()> {

@@ -27,12 +27,27 @@ impl MemoryWrapper {
 }
 
 impl Memory for MemoryWrapper {
-    fn load(&mut self, address: u32, len: u32) -> Result<&[u8], embive::interpreter::Error> {
-        self.0.with_memory_mut(|memory| memory.load(address, len))
+    fn load_bytes(
+        &mut self,
+        address: u32,
+        len: usize,
+    ) -> Result<&[u8], embive::interpreter::Error> {
+        self.0
+            .with_memory_mut(|memory| memory.load_bytes(address, len))
     }
 
-    fn store(&mut self, address: u32, data: &[u8]) -> Result<(), embive::interpreter::Error> {
-        self.0.with_memory_mut(|memory| memory.store(address, data))
+    fn mut_bytes(
+        &mut self,
+        address: u32,
+        len: usize,
+    ) -> Result<&mut [u8], embive::interpreter::Error> {
+        self.0
+            .with_memory_mut(|memory| memory.mut_bytes(address, len))
+    }
+
+    fn store_bytes(&mut self, address: u32, data: &[u8]) -> Result<(), embive::interpreter::Error> {
+        self.0
+            .with_memory_mut(|memory| memory.store_bytes(address, data))
     }
 }
 
@@ -48,12 +63,8 @@ pub struct InterpreterWrapper(InterpreterInner);
 
 impl InterpreterWrapper {
     pub fn new(memory: MemoryWrapper, instruction_limit: u32) -> Self {
-        let interpreter = InterpreterInner::new(memory, |memory| {
-            Interpreter::new(
-                memory,
-                instruction_limit,
-            )
-        });
+        let interpreter =
+            InterpreterInner::new(memory, |memory| Interpreter::new(memory, instruction_limit));
         InterpreterWrapper(interpreter)
     }
 

@@ -13,7 +13,7 @@ pub fn memory_scope<R, F: FnOnce(&Py<Memory>) -> PyResult<R>>(
     memory_wrapper: &mut MemoryWrapper,
     scope: F,
 ) -> PyResult<R> {
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let memory = Memory {
             inner: Some(AtomicPtr::new(memory_wrapper as *mut MemoryWrapper)),
         };
@@ -45,7 +45,7 @@ impl Memory {
     ///
     /// Returns:
     /// - `Vec<u8>`: Data loaded from memory.
-    pub fn load(&mut self, address: i32, len: u32) -> PyResult<Vec<u8>> {
+    pub fn load(&mut self, address: i32, len: usize) -> PyResult<Vec<u8>> {
         let address = address as u32;
         let inner = self.inner.as_mut().ok_or_else(|| {
             PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(
@@ -55,7 +55,7 @@ impl Memory {
 
         // Safety: Pointer is valid for as long as the struct is valid, borrow is guarded by pyo3 (this function is mutable).
         let memory = unsafe { &mut **inner.get_mut() };
-        let result = memory.load(address, len).map_err(ProgramError::from);
+        let result = memory.load_bytes(address, len).map_err(ProgramError::from);
 
         result.map(|data| data.to_vec()).map_err(|e| e.into())
     }
@@ -75,7 +75,9 @@ impl Memory {
 
         // Safety: Pointer is valid for as long as the struct is valid, borrow is guarded by pyo3 (this function is mutable).
         let memory = unsafe { &mut **inner.get_mut() };
-        let result = memory.store(address, &data).map_err(ProgramError::from);
+        let result = memory
+            .store_bytes(address, &data)
+            .map_err(ProgramError::from);
 
         result.map_err(|e| e.into())
     }
