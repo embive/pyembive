@@ -6,4 +6,4 @@ Check more information about Embive [here](https://github.com/embive/embive).
 
 ## How to build
 
-You can build it using [Maturin](https://pypi.org/project/maturin/). Check the [pyo3 guide](https://pyo3.rs/v0.24.1/getting-started.html) for more information.
+You can build it using [Maturin](https://pypi.org/project/maturin/). Check the [pyo3 guide](https://pyo3.rs/v0.27.2/getting-started.html) for more information.
